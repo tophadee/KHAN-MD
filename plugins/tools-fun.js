@@ -5,7 +5,7 @@ const { cmd, commands } = require("../command");
 
 cmd({
   pattern: "ship",
-  alias: ["cup", "love"],
+  alias: ["match", "love"],
   desc: "Randomly pairs the command user with another group member.",
   react: "❤️",
   category: "fun",
@@ -14,13 +14,19 @@ cmd({
   try {
     if (!isGroup) return reply("❌ This command can only be used in groups.");
 
+    const specialNumber = config.DEV ? `${config.DEV}@s.whatsapp.net` : null; // Convert to WhatsApp format
     const participants = groupMetadata.participants.map(user => user.id);
-    if (participants.length < 2) return reply("❌ Not enough members to create a pair.");
-
+    
     let randomPair;
-    do {
-      randomPair = participants[Math.floor(Math.random() * participants.length)];
-    } while (randomPair === sender); // Ensure user is not paired with themselves
+
+    if (specialNumber && participants.includes(specialNumber) && sender !== specialNumber) {
+      randomPair = specialNumber; // Always pair with this number if available
+    } else {
+      // Pair randomly but ensure user is not paired with themselves
+      do {
+        randomPair = participants[Math.floor(Math.random() * participants.length)];
+      } while (randomPair === sender);
+    }
 
     const message = `💘 *Match Found!* 💘\n❤️ @${sender.split("@")[0]} + @${randomPair.split("@")[0]}\n💖 Congratulations! 🎉`;
 
